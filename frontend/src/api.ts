@@ -39,7 +39,7 @@ export type TenderAnalysis = {
   organization: string;
   location: string;
   closing_date: string;
-  eligibility: ExtractedRequirement[];
+  experience_requirements: ExtractedRequirement[];\n  eligibility: ExtractedRequirement[];
   required_documents: ExtractedRequirement[];
   technical_requirements: ExtractedRequirement[];
   financial_requirements: ExtractedRequirement[];
