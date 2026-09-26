@@ -24,18 +24,27 @@ export type Tender = {
   closing_date?: string;
 };
 
+export type ExtractedRequirement = {
+  description: string;
+  required_value?: string;
+  unit?: string;
+  mandatory?: boolean;
+  source_page?: number | null;
+  confidence?: number;
+};
+
 export type TenderAnalysis = {
   summary: string;
   tender_type: string;
   organization: string;
   location: string;
   closing_date: string;
-  eligibility: string[];
-  required_documents: string[];
-  technical_requirements: string[];
-  financial_requirements: string[];
-  equipment_requirements: string[];
-  personnel_requirements: string[];
-  important_dates: string[];
+  eligibility: ExtractedRequirement[];
+  required_documents: ExtractedRequirement[];
+  technical_requirements: ExtractedRequirement[];
+  financial_requirements: ExtractedRequirement[];
+  equipment_requirements: ExtractedRequirement[];
+  personnel_requirements: ExtractedRequirement[];
+  important_dates: ExtractedRequirement[];
   risks_or_missing_information: string[];
 };
