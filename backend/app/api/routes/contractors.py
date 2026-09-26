@@ -48,8 +48,35 @@ def add_experience(contractor_id: UUID, payload: ExperienceCreate, owner_id: str
     result = supabase.table("contractor_experience").insert(payload.model_dump(exclude_none=True) | {"contractor_id": str(contractor_id)}).execute()
     return result.data[0]
 
+@router.patch("/{contractor_id}/experience/{experience_id}")
+def update_experience(contractor_id: UUID, experience_id: UUID, payload: ExperienceCreate, owner_id: str = Depends(get_current_user_id)):
+    owned_contractor(contractor_id, owner_id)
+    result = supabase.table("contractor_experience").update(payload.model_dump(exclude_none=True)).eq("id", str(experience_id)).eq("contractor_id", str(contractor_id)).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Experience record not found")
+    return result.data[0]
+
+@router.delete("/{contractor_id}/experience/{experience_id}", status_code=204)
+def delete_experience(contractor_id: UUID, experience_id: UUID, owner_id: str = Depends(get_current_user_id)):
+    owned_contractor(contractor_id, owner_id)
+    supabase.table("contractor_experience").delete().eq("id", str(experience_id)).eq("contractor_id", str(contractor_id)).execute()
+
 @router.post("/{contractor_id}/equipment", status_code=201)
 def add_equipment(contractor_id: UUID, payload: EquipmentCreate, owner_id: str = Depends(get_current_user_id)):
     owned_contractor(contractor_id, owner_id)
     result = supabase.table("contractor_equipment").insert(payload.model_dump(exclude_none=True) | {"contractor_id": str(contractor_id)}).execute()
     return result.data[0]
+
+
+@router.patch("/{contractor_id}/equipment/{equipment_id}")
+def update_equipment(contractor_id: UUID, equipment_id: UUID, payload: EquipmentCreate, owner_id: str = Depends(get_current_user_id)):
+    owned_contractor(contractor_id, owner_id)
+    result = supabase.table("contractor_equipment").update(payload.model_dump(exclude_none=True)).eq("id", str(equipment_id)).eq("contractor_id", str(contractor_id)).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Equipment record not found")
+    return result.data[0]
+
+@router.delete("/{contractor_id}/equipment/{equipment_id}", status_code=204)
+def delete_equipment(contractor_id: UUID, equipment_id: UUID, owner_id: str = Depends(get_current_user_id)):
+    owned_contractor(contractor_id, owner_id)
+    supabase.table("contractor_equipment").delete().eq("id", str(equipment_id)).execute()
