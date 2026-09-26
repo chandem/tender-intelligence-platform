@@ -7,12 +7,10 @@ from app.services.ai_service import analyze_tender_text
 
 router = APIRouter(prefix="/tenders/{tender_id}/analysis", tags=["analysis"])
 
-
 def _get_tender(tender_id: UUID, owner_id: str):
     result = supabase.table("tenders").select("id").eq("id", str(tender_id)).eq("owner_id", owner_id).maybe_single().execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="Tender not found")
-
 
 @router.get("")
 def get_analysis(tender_id: UUID, owner_id: str = Depends(get_current_user_id)):
@@ -21,7 +19,6 @@ def get_analysis(tender_id: UUID, owner_id: str = Depends(get_current_user_id)):
     if not result.data:
         raise HTTPException(status_code=404, detail="No AI analysis found")
     return {"tender_id": str(tender_id), "analysis": result.data["analysis"], "created_at": result.data["created_at"], "updated_at": result.data["updated_at"]}
-
 
 @router.post("")
 def analyze_tender(tender_id: UUID, owner_id: str = Depends(get_current_user_id)):
@@ -39,7 +36,6 @@ def analyze_tender(tender_id: UUID, owner_id: str = Depends(get_current_user_id)
             "tender_id": str(tender_id),
             "owner_id": owner_id,
             "analysis": analysis_data,
-            "updated_at": "now()",
         }, on_conflict="tender_id").execute()
 
         rows = []
@@ -57,8 +53,12 @@ def analyze_tender(tender_id: UUID, owner_id: str = Depends(get_current_user_id)
                 rows.append({
                     "tender_id": str(tender_id),
                     "requirement_type": requirement_type,
-                    "description": item,
-                    "mandatory": True,
+                    "description": item.description,
+                    "required_value": item.required_value or None,
+                    "unit": item.unit or None,
+                    "mandatory": item.mandatory,
+                    "source_page": item.source_page,
+                    "confidence": item.confidence,
                     "verified": False,
                 })
         supabase.table("tender_requirements").delete().eq("tender_id", str(tender_id)).execute()
