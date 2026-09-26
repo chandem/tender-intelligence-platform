@@ -36,6 +36,37 @@ def _money(text: str) -> float | None:
 def _tokens(text: str) -> set[str]:
     return {x for x in re.findall(r"[a-z0-9]+", (text or "").lower()) if len(x) > 2}
 
+EQUIPMENT_ALIASES = {
+    "excavator": {"excavator", "excavators", "digger", "backhoe"},
+    "dump truck": {"dump", "truck", "trucks", "tipper", "tippertruck"},
+    "grader": {"grader", "motorgrader", "motor", "grading"},
+    "bulldozer": {"bulldozer", "dozer"},
+    "roller": {"roller", "compactor", "vibrator"},
+    "water tanker": {"water", "tanker", "watertanker"},
+    "loader": {"loader", "wheel", "front"},
+    "crane": {"crane", "mobilecrane"},
+}
+
+def _equipment_tokens(text: str) -> set[str]:
+    tokens = _tokens(text)
+    normalized = set(tokens)
+    for canonical, aliases in EQUIPMENT_ALIASES.items():
+        if tokens & aliases:
+            normalized.add(canonical)
+    return normalized
+
+def _extract_quantity(text: str) -> float | None:
+    if not text:
+        return None
+    for pattern in [
+        r"\b(\d+(?:\.\d+)?)\s*(?:units?|nos?\.?|number|pieces?|sets?)\b",
+        r"\b(?:minimum|min\.?|at least)\s*(\d+(?:\.\d+)?)\b",
+    ]:
+        m = re.search(pattern, text, re.I)
+        if m:
+            return float(m.group(1))
+    return None
+
 def _result(req: dict, status: str, reason: str, evidence: str = "") -> dict:
     return {
         "requirement_id": req.get("id"),
@@ -77,16 +108,16 @@ def _evaluate_requirement(req: dict, contractor: dict, experience: list[dict], e
     if rtype == "equipment":
         if not equipment:
             return _result(req, "not_satisfied", "No contractor equipment is recorded.")
-        req_tokens = _tokens(description)
+        req_tokens = _equipment_tokens(description)
         best = []
         for item in equipment:
             name = str(item.get("equipment_type") or "")
-            overlap = req_tokens & _tokens(name)
+            overlap = req_tokens & _equipment_tokens(name)
             if overlap:
                 best.append((item, overlap))
         if not best:
             return _result(req, "not_satisfied", "No recorded equipment matches the tender description.")
-        required_qty = _number(req.get("required_value"))
+        required_qty = _number(req.get("required_value")) or _extract_quantity(description)
         if required_qty is None:
             qty_match = True
         else:
