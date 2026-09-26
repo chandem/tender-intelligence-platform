@@ -40,7 +40,7 @@ def analyze_tender(tender_id: UUID, owner_id: str = Depends(get_current_user_id)
 
         rows = []
         groups = {
-            "eligibility": analysis.eligibility,
+            "eligibility": analysis.eligibility,\n            "experience": analysis.experience_requirements,
             "document": analysis.required_documents,
             "technical": analysis.technical_requirements,
             "financial": analysis.financial_requirements,
