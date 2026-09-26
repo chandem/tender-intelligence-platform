@@ -14,7 +14,7 @@ class TenderAnalysis(BaseModel):
     organization: str = ""
     location: str = ""
     closing_date: str = ""
-    eligibility: list[ExtractedRequirement] = Field(default_factory=list)
+    experience_requirements: list[ExtractedRequirement] = Field(default_factory=list)\n    eligibility: list[ExtractedRequirement] = Field(default_factory=list)
     required_documents: list[ExtractedRequirement] = Field(default_factory=list)
     technical_requirements: list[ExtractedRequirement] = Field(default_factory=list)
     financial_requirements: list[ExtractedRequirement] = Field(default_factory=list)
