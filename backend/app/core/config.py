@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     openai_api_key: str = ""
-    openai_model: str = "gpt-5.6-luna"
+    openai_model: str = "gpt-4o"
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
