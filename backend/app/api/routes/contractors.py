@@ -24,6 +24,17 @@ def create_contractor(payload: ContractorCreate, owner_id: str = Depends(get_cur
         raise HTTPException(status_code=500, detail="Failed to create contractor profile")
     return result.data[0]
 
+@router.patch("/{contractor_id}", response_model=ContractorResponse)
+def update_contractor(contractor_id: UUID, payload: ContractorCreate, owner_id: str = Depends(get_current_user_id)):
+    owned_contractor(contractor_id, owner_id)
+    data = payload.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(status_code=400, detail="No profile fields supplied")
+    result = supabase.table("contractors").update(data).eq("id", str(contractor_id)).eq("owner_id", owner_id).execute()
+    if not result.data:
+        raise HTTPException(status_code=500, detail="Failed to update contractor profile")
+    return result.data[0]
+
 @router.get("/{contractor_id}")
 def get_contractor(contractor_id: UUID, owner_id: str = Depends(get_current_user_id)):
     contractor = owned_contractor(contractor_id, owner_id)
